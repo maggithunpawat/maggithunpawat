@@ -235,14 +235,78 @@
         const TEAM_ID_STORAGE_KEY = 'sayohh_team_id';
 
         const initialProducts = [
-            { id: "spread-gouda", name: "Say Ohh! Bread Spread - Gouda Cheese", group: "สเปรดทาขนมปัง", price: 69, color: "เหลือง" },
-            { id: "spread-onion", name: "Say Ohh! Bread Spread - Onion & Gouda Cheese", group: "สเปรดทาขนมปัง", price: 69, color: "ฟ้า" },
-            { id: "spread-ham", name: "Say Ohh! Bread Spread - Chicken Ham & Gouda Cheese", group: "สเปรดทาขนมปัง", price: 69, color: "แดง" },
-            { id: "spread-choco", name: "Say Ohh! Bread Spread - Chocolate Chickpea", group: "สเปรดทาขนมปัง", price: 69, color: "น้ำตาล" },
-            { id: "dip-cheddar", name: "Say Ohh! Cheese Dip - Cheddar Cheese Dip", group: "ซอสดิป", price: 89, color: "ส้ม" },
-            { id: "dip-snow", name: "Say Ohh! Cheese Dip - Snow Onion Dip", group: "ซอสดิป", price: 89, color: "ฟ้า" },
-            { id: "dip-honey", name: "Say Ohh! Cheese Dip - Honey Mustard Cheese Dip", group: "ซอสดิป", price: 89, color: "เหลือง" },
-            { id: "dip-spicy", name: "Say Ohh! Cheese Dip - Spicy Nacho Cheese Dip", group: "ซอสดิป", price: 89, color: "แดง" },
+            {
+                id: "spread-gouda",
+                name: "Say Ohh! Bread Spread - Gouda Cheese",
+                group: "สเปรดทาขนมปัง",
+                price: 69,
+                color: "เหลือง",
+                weight: 90,
+                package: "หลอด"
+            },
+            {
+                id: "spread-onion",
+                name: "Say Ohh! Bread Spread - Onion & Gouda Cheese",
+                group: "สเปรดทาขนมปัง",
+                price: 69,
+                color: "ฟ้า",
+                weight: 90,
+                package: "หลอด"
+            },
+            {
+                id: "spread-ham",
+                name: "Say Ohh! Bread Spread - Chicken Ham & Gouda Cheese",
+                group: "สเปรดทาขนมปัง",
+                price: 69,
+                color: "แดง",
+                weight: 90,
+                package: "หลอด"
+            },
+            {
+                id: "spread-choco",
+                name: "Say Ohh! Bread Spread - Chocolate Chickpea",
+                group: "สเปรดทาขนมปัง",
+                price: 69,
+                color: "น้ำตาล",
+                weight: 90,
+                package: "หลอด"
+            },
+            {
+                id: "dip-cheddar",
+                name: "Say Ohh! Cheese Dip - Cheddar Cheese Dip",
+                group: "ซอสดิป",
+                price: 89,
+                color: "ส้ม",
+                weight: 200,
+                package: "ขวด"
+            },
+            {
+                id: "dip-snow",
+                name: "Say Ohh! Cheese Dip - Snow Onion Dip",
+                group: "ซอสดิป",
+                price: 89,
+                color: "ฟ้า",
+                weight: 200,
+                package: "ขวด"
+            },
+            {
+                id: "dip-honey",
+                name: "Say Ohh! Cheese Dip - Honey Mustard Cheese Dip",
+                group: "ซอสดิป",
+                price: 89,
+                color: "เหลือง",
+                weight: 200,
+                package: "ขวด"
+            },
+            {
+                id: "dip-spicy",
+                name: "Say Ohh! Cheese Dip - Spicy Nacho Cheese Dip",
+                group: "ซอสดิป",
+                price: 89,
+                color: "แดง",
+                weight: 200,
+                package: "ขวด"
+            },
         ];
 
         // --- DOM ELEMENTS ---
@@ -470,7 +534,7 @@
                 const isLow = product.current_stock <= LOW_STOCK_THRESHOLD;
                 const card = `
                     <div class="product-card bg-white rounded-lg shadow p-5 border-l-4 ${isLow ? 'low-stock' : 'border-amber-400'}">
-                        <p class="text-xs text-gray-500">${product.group} - สี${product.color}</p>
+                        <p class="text-xs text-gray-500">${product.group} - สี${product.color} - น้ำหนัก ${product.weight} กรัม</p>
                         <h3 class="font-bold text-lg text-gray-800 truncate">${product.name.replace('Say Ohh! Bread Spread - ', '').replace('Say Ohh! Cheese Dip - ', '')}</h3>
                         <div class="flex justify-between items-baseline mt-3">
                             <p class="text-3xl font-bold ${isLow ? 'low-stock-text' : 'text-gray-900'}">${product.current_stock}</p>
