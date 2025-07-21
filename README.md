@@ -1,11 +1,10 @@
-👋 Hi there, I’m Maggi!
-
-✨ Creative Marketer | Brand Builder | Event Strategist ✨
+Hi there, I’m Maggig
+Creative Marketer | Brand Builder | Event Strategist 
 
 I’m currently working as a Marketing Manager at Innofresh Co., Ltd., leading the marketing direction for brands like Say Ohh! (cheese spreads & dips) and Secret Spoon (sauces for modern home cooks).
 
-💼 What I’m up to:
-	•	🚀 Driving omnichannel campaigns (offline & digital)
+What I’m up to:
+	•	Driving omnichannel campaigns (offline & digital)
 	•	📣 Managing event marketing and influencer strategy
 	•	📊 Exploring data-driven insights for smarter brand moves
 	•	🎨 Creating fun, Gen Z-friendly content for food lovers
