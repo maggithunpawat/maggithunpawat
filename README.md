@@ -1,16 +1,30 @@
-## Hi there 👋
+👋 Hi there, I’m Maggi!
 
-<!--
-**maggithunpawat/maggithunpawat** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+✨ Creative Marketer | Brand Builder | Event Strategist ✨
 
-Here are some ideas to get you started:
+I’m currently working as a Marketing Manager at Innofresh Co., Ltd., leading the marketing direction for brands like Say Ohh! (cheese spreads & dips) and Secret Spoon (sauces for modern home cooks).
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+💼 What I’m up to:
+	•	🚀 Driving omnichannel campaigns (offline & digital)
+	•	📣 Managing event marketing and influencer strategy
+	•	📊 Exploring data-driven insights for smarter brand moves
+	•	🎨 Creating fun, Gen Z-friendly content for food lovers
+
+🌱 Currently learning:
+	•	AI automation in marketing
+	•	SEO for GenAI search
+	•	Advanced eCommerce integrations (Shopee, TikTok, Lazada)
+
+🤝 Looking to collaborate on:
+	•	Food branding projects
+	•	Innovative product launches
+	•	Campaign challenges & creative storytelling
+
+💬 Ask me about:
+	•	Product marketing & communication
+	•	How to go viral with food content 🍞🧀
+	•	UGC, KOLs, and event activations
+
+📫 How to reach me:
+
+DM me on LinkedIn or drop a message on my GitHub discussions.
