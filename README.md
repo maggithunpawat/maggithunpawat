@@ -1,4 +1,4 @@
-Hi there, I’m Maggig
+ Hi there, I’m Maggig
 Creative Marketer | Brand Builder | Event Strategist 
 
 I’m currently working as a Marketing Manager at Innofresh Co., Ltd., leading the marketing direction for brands like Say Ohh! (cheese spreads & dips) and Secret Spoon (sauces for modern home cooks).
