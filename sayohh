@@ -1,7 +1,680 @@
-echo "# maggithunpawat" >> README.md
-git init
-git add README.md
-git commit -m "first commit"
-git branch -M main
-git remote add origin https://github.com/maggithunpawat/maggithunpawat.git
-git push -u origin main
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Say Ohh! - ระบบจัดการสต็อกสินค้า (เวอร์ชันทีม)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f7fafc;
+        }
+        .product-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .modal-backdrop {
+            background-color: rgba(0,0,0,0.5);
+            transition: opacity 0.3s ease;
+        }
+        .modal-content {
+            transition: transform 0.3s ease;
+        }
+        .low-stock {
+            background-color: #fef2f2;
+            border-left-color: #ef4444;
+        }
+        .low-stock-text {
+            color: #ef4444;
+        }
+        .btn-primary {
+            background-color: #f59e0b;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #d97706;
+        }
+        .btn-secondary {
+            background-color: #6b7280;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div id="app-container" class="max-w-7xl mx-auto">
+        <!-- Team ID Entry Screen -->
+        <div id="teamIdScreen" class="flex flex-col items-center justify-center min-h-screen">
+            <div class="w-full max-w-md p-8 bg-white rounded-xl shadow-2xl text-center">
+                <i class="fas fa-users fa-3x text-amber-500 mb-4"></i>
+                <h1 class="text-2xl font-bold text-gray-800 mb-2">เข้าร่วมหรือสร้างทีม</h1>
+                <p class="text-gray-600 mb-6">ใส่รหัสทีมเพื่อเข้าร่วมสต็อก หรือสร้างรหัสใหม่สำหรับทีมของคุณ</p>
+                <form id="teamIdForm">
+                    <input type="text" id="teamIdInput" placeholder="เช่น sayohh-team" class="w-full p-3 border border-gray-300 rounded-md shadow-sm text-center text-lg focus:ring-amber-500 focus:border-amber-500" required>
+                    <button type="submit" class="w-full mt-4 btn-primary font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200">
+                        เริ่มใช้งาน
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Main App Content (Initially Hidden) -->
+        <div id="mainApp" class="hidden">
+            <!-- Header -->
+            <header class="mb-8">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="text-center md:text-left">
+                        <h1 class="text-4xl font-bold text-gray-800">Say Ohh! Stock</h1>
+                        <p class="text-lg text-gray-500">ระบบจัดการสต็อกสินค้า</p>
+                    </div>
+                    <div class="text-center md:text-right">
+                         <div class="bg-amber-100 border border-amber-300 text-amber-800 rounded-lg px-4 py-2">
+                            <span class="font-semibold">รหัสทีม:</span>
+                            <span id="teamIdDisplay" class="font-bold text-lg"></span>
+                        </div>
+                        <button id="changeTeamBtn" class="mt-2 text-sm text-gray-500 hover:text-red-600 hover:underline">
+                            <i class="fas fa-sign-out-alt mr-1"></i>เปลี่ยนทีม
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Loading Indicator -->
+            <div id="loading" class="text-center py-10">
+                <i class="fas fa-spinner fa-spin fa-3x text-amber-500"></i>
+                <p class="mt-2 text-gray-600">กำลังโหลดข้อมูล...</p>
+            </div>
+
+            <!-- Main Content -->
+            <main id="main-content" class="hidden">
+                <!-- Add Transaction Button -->
+                <div class="flex justify-center mb-8">
+                    <button id="openModalBtn" class="btn-primary font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200 flex items-center gap-2">
+                        <i class="fas fa-plus-circle"></i>
+                        เพิ่มรายการใหม่
+                    </button>
+                </div>
+
+                <!-- Product Dashboard -->
+                <div id="product-dashboard" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                    <!-- Product cards will be inserted here -->
+                </div>
+
+                <!-- Transaction History -->
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-700 mb-4">ประวัติรายการล่าสุด</h2>
+                    <div class="bg-white rounded-lg shadow overflow-x-auto">
+                        <table class="w-full min-w-max">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">วันที่</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">สินค้า</th>
+                                    <th class="p-4 text-center text-sm font-semibold text-gray-600">ประเภท</th>
+                                    <th class="p-4 text-center text-sm font-semibold text-gray-600">จำนวน</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">ช่องทาง/หมายเหตุ</th>
+                                    <th class="p-4 text-right text-sm font-semibold text-gray-600">มูลค่า (บาท)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transaction-history" class="divide-y divide-gray-200">
+                               <!-- Transaction rows will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Transaction Modal -->
+    <div id="transactionModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+        <div id="modal-content" class="bg-white rounded-lg shadow-2xl w-full max-w-lg p-6 transform scale-95">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <h2 class="text-2xl font-bold text-gray-800">เพิ่มรายการ</h2>
+                <button id="closeModalBtn" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times fa-lg"></i>
+                </button>
+            </div>
+            <form id="transactionForm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Transaction Type -->
+                    <div class="md:col-span-2">
+                        <label for="transactionType" class="block text-sm font-medium text-gray-700 mb-1">ประเภทรายการ</label>
+                        <select id="transactionType" name="transactionType" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500" required>
+                            <option value="out">เบิกออก (ขาย/ของขวัญ)</option>
+                            <option value="in">เบิกเข้า (รับจากคลัง)</option>
+                        </select>
+                    </div>
+
+                    <!-- Product -->
+                    <div class="md:col-span-2">
+                        <label for="product" class="block text-sm font-medium text-gray-700 mb-1">สินค้า</label>
+                        <select id="product" name="product" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500" required>
+                            <!-- Product options will be inserted here -->
+                        </select>
+                    </div>
+                    
+                    <!-- Quantity -->
+                    <div>
+                        <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">จำนวน</label>
+                        <input type="number" id="quantity" name="quantity" min="1" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500" required>
+                    </div>
+
+                    <!-- Sale Price -->
+                    <div id="price-field">
+                        <label for="salePrice" class="block text-sm font-medium text-gray-700 mb-1">ราคาขาย (ต่อชิ้น)</label>
+                        <input type="number" id="salePrice" name="salePrice" step="0.01" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500">
+                    </div>
+
+                    <!-- Channel -->
+                    <div id="channel-field" class="md:col-span-2">
+                        <label for="channel" class="block text-sm font-medium text-gray-700 mb-1">ช่องทาง</label>
+                        <select id="channel" name="channel" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500">
+                            <option value="Online">ขายออนไลน์</option>
+                            <option value="Event">ขายอีเว้นท์</option>
+                            <option value="Gift">ของขวัญ</option>
+                        </select>
+                    </div>
+
+                    <!-- Sub Channel -->
+                    <div id="subchannel-field" class="md:col-span-2 hidden">
+                        <label for="subchannel" class="block text-sm font-medium text-gray-700 mb-1">ช่องทางออนไลน์</label>
+                        <select id="subchannel" name="subchannel" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500">
+                            <option value="Shopee">Shopee</option>
+                            <option value="Lazada">Lazada</option>
+                            <option value="TikTok">TikTok</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Notes -->
+                    <div id="notes-field" class="md:col-span-2 hidden">
+                        <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">หมายเหตุ (สำหรับเบิกเข้า)</label>
+                        <input type="text" id="notes" name="notes" placeholder="เช่น รับจากคลังใหญ่" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500">
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <button type="submit" class="btn-primary font-bold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 flex items-center gap-2">
+                        <i class="fas fa-save"></i>
+                        บันทึกรายการ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Custom Alert Modal -->
+    <div id="alertModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-sm p-6 text-center">
+            <div id="alertIcon"></div>
+            <h3 id="alertTitle" class="text-xl font-bold mt-4"></h3>
+            <p id="alertMessage" class="text-gray-600 mt-2"></p>
+            <button id="closeAlertBtn" class="mt-6 btn-primary font-bold py-2 px-6 rounded-lg">ตกลง</button>
+        </div>
+    </div>
+
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, onSnapshot, addDoc, query, serverTimestamp, increment, writeBatch, getDocs, limit, orderBy as firestoreOrderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- CONFIGURATION ---
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'say-ohh-stock-app';
+
+        const LOW_STOCK_THRESHOLD = 20;
+        const TEAM_ID_STORAGE_KEY = 'sayohh_team_id';
+
+        const initialProducts = [
+            { id: "spread-gouda", name: "Say Ohh! Bread Spread - Gouda Cheese", group: "สเปรดทาขนมปัง", price: 69, color: "เหลือง" },
+            { id: "spread-onion", name: "Say Ohh! Bread Spread - Onion & Gouda Cheese", group: "สเปรดทาขนมปัง", price: 69, color: "ฟ้า" },
+            { id: "spread-ham", name: "Say Ohh! Bread Spread - Chicken Ham & Gouda Cheese", group: "สเปรดทาขนมปัง", price: 69, color: "แดง" },
+            { id: "spread-choco", name: "Say Ohh! Bread Spread - Chocolate Chickpea", group: "สเปรดทาขนมปัง", price: 69, color: "น้ำตาล" },
+            { id: "dip-cheddar", name: "Say Ohh! Cheese Dip - Cheddar Cheese Dip", group: "ซอสดิป", price: 89, color: "ส้ม" },
+            { id: "dip-snow", name: "Say Ohh! Cheese Dip - Snow Onion Dip", group: "ซอสดิป", price: 89, color: "ฟ้า" },
+            { id: "dip-honey", name: "Say Ohh! Cheese Dip - Honey Mustard Cheese Dip", group: "ซอสดิป", price: 89, color: "เหลือง" },
+            { id: "dip-spicy", name: "Say Ohh! Cheese Dip - Spicy Nacho Cheese Dip", group: "ซอสดิป", price: 89, color: "แดง" },
+        ];
+
+        // --- DOM ELEMENTS ---
+        const teamIdScreen = document.getElementById('teamIdScreen');
+        const teamIdForm = document.getElementById('teamIdForm');
+        const teamIdInput = document.getElementById('teamIdInput');
+        const mainApp = document.getElementById('mainApp');
+        const teamIdDisplay = document.getElementById('teamIdDisplay');
+        const changeTeamBtn = document.getElementById('changeTeamBtn');
+        const loadingEl = document.getElementById('loading');
+        const mainContentEl = document.getElementById('main-content');
+        const productDashboard = document.getElementById('product-dashboard');
+        const transactionHistory = document.getElementById('transaction-history');
+        const productSelect = document.getElementById('product');
+        const openModalBtn = document.getElementById('openModalBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const transactionModal = document.getElementById('transactionModal');
+        const modalContent = document.getElementById('modal-content');
+        const transactionForm = document.getElementById('transactionForm');
+        const transactionTypeSelect = document.getElementById('transactionType');
+        const channelField = document.getElementById('channel-field');
+        const subchannelField = document.getElementById('subchannel-field');
+        const priceField = document.getElementById('price-field');
+        const notesField = document.getElementById('notes-field');
+        const channelSelect = document.getElementById('channel');
+        const salePriceInput = document.getElementById('salePrice');
+
+        // Alert Modal Elements
+        const alertModal = document.getElementById('alertModal');
+        const alertIcon = document.getElementById('alertIcon');
+        const alertTitle = document.getElementById('alertTitle');
+        const alertMessage = document.getElementById('alertMessage');
+        const closeAlertBtn = document.getElementById('closeAlertBtn');
+
+        // --- FIREBASE & APP STATE ---
+        let app, auth, db, teamId;
+        let unsubscribeProducts = () => {};
+        let unsubscribeTransactions = () => {};
+
+        function initializeFirebase() {
+            try {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                handleAuthentication();
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+                showCustomAlert('error', 'ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้ กรุณารีเฟรชหน้าจอ');
+            }
+        }
+
+        async function handleAuthentication() {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    console.log("User is signed in with UID:", user.uid);
+                    checkTeamId();
+                } else {
+                    console.log("No user signed in, attempting anonymous sign-in.");
+                    try {
+                         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                         } else {
+                            await signInAnonymously(auth);
+                         }
+                    } catch (error) {
+                        console.error("Anonymous sign-in failed:", error);
+                    }
+                }
+            });
+        }
+        
+        function checkTeamId() {
+            const savedTeamId = localStorage.getItem(TEAM_ID_STORAGE_KEY);
+            if (savedTeamId) {
+                startApp(savedTeamId);
+            } else {
+                showTeamIdScreen();
+            }
+        }
+        
+        function showTeamIdScreen() {
+            mainApp.classList.add('hidden');
+            teamIdScreen.classList.remove('hidden');
+            teamIdInput.focus();
+        }
+        
+        function handleTeamIdSubmit(e) {
+            e.preventDefault();
+            const enteredId = teamIdInput.value.trim();
+            if (enteredId) {
+                startApp(enteredId);
+            }
+        }
+
+        async function startApp(newTeamId) {
+            teamId = newTeamId;
+            localStorage.setItem(TEAM_ID_STORAGE_KEY, teamId);
+            
+            teamIdDisplay.textContent = teamId;
+            teamIdScreen.classList.add('hidden');
+            mainApp.classList.remove('hidden');
+            loadingEl.classList.remove('hidden');
+            mainContentEl.classList.add('hidden');
+
+            await setupInitialData();
+            attachDataListeners();
+            
+            loadingEl.classList.add('hidden');
+            mainContentEl.classList.remove('hidden');
+        }
+
+        function changeTeam() {
+            unsubscribeProducts();
+            unsubscribeTransactions();
+            localStorage.removeItem(TEAM_ID_STORAGE_KEY);
+            teamId = null;
+            showTeamIdScreen();
+        }
+
+        // --- DATA SETUP ---
+        async function setupInitialData() {
+            if (!db || !teamId) return;
+            const productsCollectionRef = collection(db, `artifacts/${appId}/public/data/shared_stocks/${teamId}/products`);
+            
+            try {
+                const snapshot = await getDocs(productsCollectionRef);
+                if (snapshot.empty) {
+                    console.log(`No products found for team ${teamId}, initializing...`);
+                    const batch = writeBatch(db);
+                    initialProducts.forEach(product => {
+                        const docRef = doc(db, `artifacts/${appId}/public/data/shared_stocks/${teamId}/products`, product.id);
+                        batch.set(docRef, {
+                            ...product,
+                            current_stock: 0
+                        });
+                    });
+                    await batch.commit();
+                    console.log("Initial products created for team.");
+                    showCustomAlert('success', 'สร้างทีมสำเร็จ!', 'ข้อมูลสินค้าเริ่มต้นถูกสร้างสำหรับทีมของคุณแล้ว');
+                } else {
+                    console.log(`Products already exist for team ${teamId}.`);
+                }
+                await populateProductSelect();
+            } catch (error) {
+                console.error("Error setting up initial data:", error);
+                showCustomAlert('error', 'เกิดข้อผิดพลาด', 'ไม่สามารถตั้งค่าข้อมูลเริ่มต้นได้');
+            }
+        }
+
+        async function populateProductSelect() {
+            if (!db || !teamId) return;
+            const productsCollectionRef = collection(db, `artifacts/${appId}/public/data/shared_stocks/${teamId}/products`);
+            try {
+                const snapshot = await getDocs(productsCollectionRef);
+                productSelect.innerHTML = '<option value="" disabled selected>กรุณาเลือกสินค้า</option>';
+                const productsData = [];
+                snapshot.forEach(doc => productsData.push({ id: doc.id, ...doc.data() }));
+                
+                productsData.sort((a, b) => {
+                    if (a.group < b.group) return -1;
+                    if (a.group > b.group) return 1;
+                    if (a.name < b.name) return -1;
+                    if (a.name > b.name) return 1;
+                    return 0;
+                });
+
+                productsData.forEach(product => {
+                    const option = document.createElement('option');
+                    option.value = product.id;
+                    option.textContent = product.name;
+                    option.dataset.price = product.price;
+                    productSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error("Error populating product select:", error);
+            }
+        }
+
+        // --- REAL-TIME LISTENERS ---
+        function attachDataListeners() {
+            if (!db || !teamId) return;
+            
+            // Detach previous listeners
+            unsubscribeProducts();
+            unsubscribeTransactions();
+
+            // Products listener
+            const productsQuery = query(collection(db, `artifacts/${appId}/public/data/shared_stocks/${teamId}/products`));
+            unsubscribeProducts = onSnapshot(productsQuery, (snapshot) => {
+                const products = [];
+                snapshot.forEach(doc => products.push({ id: doc.id, ...doc.data() }));
+                updateDashboard(products);
+            }, (error) => {
+                console.error("Error fetching products:", error);
+            });
+
+            // Transactions listener
+            const transactionsQuery = query(collection(db, `artifacts/${appId}/public/data/shared_stocks/${teamId}/transactions`), firestoreOrderBy("timestamp", "desc"), limit(15));
+            unsubscribeTransactions = onSnapshot(transactionsQuery, (snapshot) => {
+                const transactions = [];
+                snapshot.forEach(doc => transactions.push({ id: doc.id, ...doc.data() }));
+                updateTransactionHistory(transactions);
+            }, (error) => {
+                console.error("Error fetching transactions:", error);
+            });
+        }
+
+        // --- UI UPDATES ---
+        function updateDashboard(products) {
+            productDashboard.innerHTML = '';
+            if (!products || products.length === 0) {
+                productDashboard.innerHTML = `<p class="col-span-full text-center text-gray-500">ไม่พบข้อมูลสินค้า</p>`;
+                return;
+            }
+            
+            products.sort((a, b) => {
+                if (a.group < b.group) return -1;
+                if (a.group > b.group) return 1;
+                if (a.name < b.name) return -1;
+                if (a.name > b.name) return 1;
+                return 0;
+            });
+
+            products.forEach(product => {
+                const isLow = product.current_stock <= LOW_STOCK_THRESHOLD;
+                const card = `
+                    <div class="product-card bg-white rounded-lg shadow p-5 border-l-4 ${isLow ? 'low-stock' : 'border-amber-400'}">
+                        <p class="text-xs text-gray-500">${product.group} - สี${product.color}</p>
+                        <h3 class="font-bold text-lg text-gray-800 truncate">${product.name.replace('Say Ohh! Bread Spread - ', '').replace('Say Ohh! Cheese Dip - ', '')}</h3>
+                        <div class="flex justify-between items-baseline mt-3">
+                            <p class="text-3xl font-bold ${isLow ? 'low-stock-text' : 'text-gray-900'}">${product.current_stock}</p>
+                            <p class="text-gray-600">ชิ้น</p>
+                        </div>
+                        ${isLow ? `<p class="text-sm font-semibold mt-1 low-stock-text">สินค้าใกล้หมด!</p>` : ''}
+                    </div>
+                `;
+                productDashboard.innerHTML += card;
+            });
+        }
+
+        function updateTransactionHistory(transactions) {
+            transactionHistory.innerHTML = '';
+            if (!transactions || transactions.length === 0) {
+                transactionHistory.innerHTML = `<tr><td colspan="6" class="text-center p-5 text-gray-500">ยังไม่มีรายการ</td></tr>`;
+                return;
+            }
+            transactions.forEach(tx => {
+                const date = tx.timestamp ? tx.timestamp.toDate().toLocaleDateString('th-TH') : 'N/A';
+                const typeClass = tx.type === 'in' ? 'text-green-600' : 'text-red-600';
+                const typeText = tx.type === 'in' ? 'เบิกเข้า' : 'เบิกออก';
+                const typeIcon = tx.type === 'in' ? 'fa-arrow-up' : 'fa-arrow-down';
+                const value = tx.total_value ? tx.total_value.toFixed(2) : '0.00';
+                
+                let details = '';
+                if(tx.type === 'out') {
+                    details = tx.channel;
+                    if(tx.channel === 'Online' && tx.sub_channel) {
+                        details += ` (${tx.sub_channel})`;
+                    }
+                } else {
+                    details = tx.notes || '-';
+                }
+
+                const row = `
+                    <tr>
+                        <td class="p-4 text-sm text-gray-500">${date}</td>
+                        <td class="p-4 text-sm text-gray-800 font-medium">${tx.productName}</td>
+                        <td class="p-4 text-center text-sm font-semibold ${typeClass}">
+                            <i class="fas ${typeIcon} mr-1"></i> ${typeText}
+                        </td>
+                        <td class="p-4 text-center text-sm text-gray-800">${tx.quantity}</td>
+                        <td class="p-4 text-sm text-gray-600">${details}</td>
+                        <td class="p-4 text-right text-sm text-gray-800 font-mono">${value}</td>
+                    </tr>
+                `;
+                transactionHistory.innerHTML += row;
+            });
+        }
+
+        // --- MODAL & FORM LOGIC ---
+        function toggleModal(show) {
+            if (show) {
+                transactionModal.classList.remove('hidden');
+                setTimeout(() => {
+                    transactionModal.classList.remove('opacity-0');
+                    modalContent.classList.remove('scale-95');
+                    modalContent.classList.add('scale-100');
+                }, 10);
+            } else {
+                transactionModal.classList.add('opacity-0');
+                modalContent.classList.remove('scale-100');
+                modalContent.classList.add('scale-95');
+                setTimeout(() => {
+                    transactionModal.classList.add('hidden');
+                }, 300);
+            }
+        }
+
+        function updateFormVisibility() {
+            const type = transactionTypeSelect.value;
+            if (type === 'out') {
+                channelField.style.display = 'block';
+                notesField.style.display = 'none';
+                updateChannelFields();
+            } else { // 'in'
+                channelField.style.display = 'none';
+                subchannelField.style.display = 'none';
+                priceField.style.display = 'none';
+                notesField.style.display = 'block';
+            }
+        }
+        
+        function updateChannelFields() {
+            const channel = channelSelect.value;
+            if (channel === 'Online') {
+                subchannelField.style.display = 'block';
+            } else {
+                subchannelField.style.display = 'none';
+            }
+            
+            if (channel === 'Gift') {
+                priceField.style.display = 'none';
+                salePriceInput.value = 0;
+            } else {
+                priceField.style.display = 'block';
+                const selectedProduct = productSelect.options[productSelect.selectedIndex];
+                if (selectedProduct && selectedProduct.value) {
+                    salePriceInput.value = selectedProduct.dataset.price || '';
+                }
+            }
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            if (!db || !teamId) return;
+
+            const formData = new FormData(transactionForm);
+            const data = Object.fromEntries(formData.entries());
+
+            const quantity = parseInt(data.quantity, 10);
+            if (isNaN(quantity) || quantity <= 0) {
+                showCustomAlert('warning', 'ข้อมูลไม่ถูกต้อง', 'กรุณาใส่จำนวนที่ถูกต้อง');
+                return;
+            }
+
+            const productDocRef = doc(db, `artifacts/${appId}/public/data/shared_stocks/${teamId}/products`, data.product);
+            const transactionCollectionRef = collection(db, `artifacts/${appId}/public/data/shared_stocks/${teamId}/transactions`);
+            
+            try {
+                const productDoc = await getDoc(productDocRef);
+                if (!productDoc.exists()) {
+                    showCustomAlert('error', 'ผิดพลาด', 'ไม่พบสินค้านี้ในระบบ');
+                    return;
+                }
+                const currentStock = productDoc.data().current_stock;
+
+                if (data.transactionType === 'out' && quantity > currentStock) {
+                    showCustomAlert('warning', 'สต็อกไม่เพียงพอ', `สินค้า ${productDoc.data().name} มีในสต็อกเพียง ${currentStock} ชิ้น`);
+                    return;
+                }
+                
+                const price = parseFloat(data.salePrice) || 0;
+                const newTransaction = {
+                    timestamp: serverTimestamp(),
+                    productId: data.product,
+                    productName: productDoc.data().name,
+                    type: data.transactionType,
+                    quantity: quantity,
+                    channel: data.transactionType === 'out' ? data.channel : null,
+                    sub_channel: data.transactionType === 'out' && data.channel === 'Online' ? data.subchannel : null,
+                    notes: data.transactionType === 'in' ? data.notes : null,
+                    sale_price_per_unit: data.transactionType === 'out' && data.channel !== 'Gift' ? price : 0,
+                    total_value: data.transactionType === 'out' && data.channel !== 'Gift' ? quantity * price : 0,
+                };
+                
+                await addDoc(transactionCollectionRef, newTransaction);
+                await updateDoc(productDocRef, {
+                    current_stock: increment(data.transactionType === 'in' ? quantity : -quantity)
+                });
+                
+                showCustomAlert('success', 'บันทึกสำเร็จ', 'รายการของคุณถูกบันทึกเรียบร้อยแล้ว');
+                transactionForm.reset();
+                updateFormVisibility();
+                toggleModal(false);
+
+            } catch (error) {
+                console.error("Error submitting transaction:", error);
+                showCustomAlert('error', 'บันทึกไม่สำเร็จ', 'เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+            }
+        }
+        
+        // --- Custom Alert ---
+        function showCustomAlert(type, title, message) {
+            alertTitle.textContent = title;
+            alertMessage.textContent = message;
+
+            switch(type) {
+                case 'success':
+                    alertIcon.innerHTML = `<i class="fas fa-check-circle fa-3x text-green-500"></i>`;
+                    closeAlertBtn.className = 'mt-6 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg';
+                    break;
+                case 'error':
+                    alertIcon.innerHTML = `<i class="fas fa-times-circle fa-3x text-red-500"></i>`;
+                    closeAlertBtn.className = 'mt-6 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg';
+                    break;
+                case 'warning':
+                    alertIcon.innerHTML = `<i class="fas fa-exclamation-triangle fa-3x text-yellow-500"></i>`;
+                    closeAlertBtn.className = 'mt-6 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded-lg';
+                    break;
+            }
+            alertModal.classList.remove('hidden');
+        }
+
+        // --- EVENT LISTENERS ---
+        teamIdForm.addEventListener('submit', handleTeamIdSubmit);
+        changeTeamBtn.addEventListener('click', changeTeam);
+        openModalBtn.addEventListener('click', () => {
+            transactionForm.reset();
+            updateFormVisibility();
+            toggleModal(true);
+        });
+        closeModalBtn.addEventListener('click', () => toggleModal(false));
+        transactionTypeSelect.addEventListener('change', updateFormVisibility);
+        channelSelect.addEventListener('change', updateChannelFields);
+        productSelect.addEventListener('change', updateChannelFields);
+        transactionForm.addEventListener('submit', handleFormSubmit);
+        closeAlertBtn.addEventListener('click', () => alertModal.classList.add('hidden'));
+
+        // --- INITIALIZATION ---
+        window.onload = initializeFirebase;
+
+    </script>
+</body>
+</html>
+
